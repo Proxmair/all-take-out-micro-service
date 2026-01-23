@@ -43,6 +43,8 @@ const ProductsSchema = new mongoose.Schema(
         }],
         quantity: { type: Number, default: 1 },
         misc: { type: mongoose.Schema.Types.Mixed },
+        basePrice: { type: Number, required: true },
+        discount: { type: Number, default: 0 },
     },
     { timestamps: true }
 );
