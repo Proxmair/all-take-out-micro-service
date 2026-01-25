@@ -3,8 +3,6 @@ import Categories from "../../module/Categories.js";
 import User from "../../module/User.js";
 
 export default async function handler(req, res) {
-    if (req.method !== "PUT")
-        return res.status(405).json({ error: "Method not allowed" });
     try {
         await connectDB();
         const { categoryId, subCategoryId, subCategoryData, adminId } = req.body;

@@ -3,17 +3,7 @@
 import { connectDB } from "../../lib/mongodb.js";
 import Cart from "../../module/Cart.js";
 
-
-/**
- * Remove from cart route
- * - Validates request method
- * - Handles errors with try/catch
- * - Returns error responses with status codes
- */
 export default async function handler(req, res) {
-  if (req.method !== "DELETE") {
-    return res.status(405).json({ message: "Method not allowed" });
-  }
   try {
     await connectDB();
 
