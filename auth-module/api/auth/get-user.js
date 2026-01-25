@@ -3,6 +3,13 @@ import User from "../../module/User.js";
 import { connectDB } from "../../lib/mongodb.js";
 
 export default async function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, GET, DELETE, PUT, OPTIONS");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization"
+  );
+  res.setHeader("Access-Control-Allow-Credentials", "true");
   // Try to get token from cookie or Authorization header
   const token = req.cookies?.token || req.headers["authorization"]?.replace("Bearer ", "");
 
