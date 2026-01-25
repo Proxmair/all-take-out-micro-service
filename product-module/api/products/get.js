@@ -9,6 +9,9 @@ export default async function handler(req, res) {
     "Content-Type, Authorization"
   );
   res.setHeader("Access-Control-Allow-Credentials", "true");
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
   try {
     await connectDB();
     const products = await Products.find();

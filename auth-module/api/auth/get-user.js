@@ -10,6 +10,9 @@ export default async function handler(req, res) {
     "Content-Type, Authorization"
   );
   res.setHeader("Access-Control-Allow-Credentials", "true");
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
   // Try to get token from cookie or Authorization header
   const token = req.cookies?.token || req.headers["authorization"]?.replace("Bearer ", "");
 
