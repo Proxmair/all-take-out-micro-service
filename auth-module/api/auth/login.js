@@ -11,6 +11,9 @@ export default async function handler(req, res) {
     "Content-Type, Authorization"
   );
   res.setHeader("Access-Control-Allow-Credentials", "true");
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
   try {
     await connectDB();
 
@@ -40,9 +43,6 @@ export default async function handler(req, res) {
       process.env.JWT_SECRET || "dev_secret_key",
       { expiresIn: "7d" }
     );
-
-    // Set token in cookie
-    res.setHeader("Set-Cookie", `token=${token}; HttpOnly; Path=/; Max-Age=604800`);
 
     res.status(200).json({
       id: user._id,
