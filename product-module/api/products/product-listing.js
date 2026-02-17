@@ -4,9 +4,7 @@ import Products from "../../module/Products.js";
 const ALLOWED_SORT_FIELDS = [
     "createdAt",
     "updatedAt",
-    "basePrice",
-    "name",
-    "quantity"
+    "name"
 ];
 
 export default async function handler(req, res) {
@@ -20,94 +18,47 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
-    try {
-        await connectDB();
+  try {
+    await connectDB();
+    const {
+      materials,
+      sizes,
+      shapes,
+      qualities,
+      sortBy = "createdAt",
+      sortOrder = "desc",
+      page = 1,
+      limit = 20
+    } = req.body;
 
-        const {
-            materialName,
-            sizeName,
-            shapeName,
-            templateName,
-            sortBy = "createdAt",
-            sortOrder = "desc",
-            page = 1,
-            limit = 20
-        } = req.body;
+    const filter = {};
+    if (materials?.length) filter.materials = { $in: materials };
+    if (sizes?.length) filter.sizes = { $in: sizes };
+    if (shapes?.length) filter.shapes = { $in: shapes };
+    if (qualities?.length) filter.qualities = { $in: qualities };
 
-        const andFilters = [];
+    const sortField = ALLOWED_SORT_FIELDS.includes(sortBy) ? sortBy : "createdAt";
+    const sort = { [sortField]: sortOrder === "asc" ? 1 : -1 };
+    const pageNum = Math.max(parseInt(page), 1);
+    const limitNum = Math.max(parseInt(limit), 1);
+    const skip = (pageNum - 1) * limitNum;
 
-        // MATERIAL (OR inside, AND outside)
-        if (materialName?.length) {
-            andFilters.push({
-                material: {
-                    $elemMatch: {
-                        name: { $in: Array.isArray(materialName) ? materialName : [materialName] }
-                    }
-                }
-            });
-        }
+    const [products, total] = await Promise.all([
+      Products.find(filter)
+        .sort(sort)
+        .skip(skip)
+        .limit(limitNum),
+      Products.countDocuments(filter)
+    ]);
 
-        // SIZE
-        if (sizeName?.length) {
-            andFilters.push({
-                size: {
-                    $elemMatch: {
-                        name: { $in: Array.isArray(sizeName) ? sizeName : [sizeName] }
-                    }
-                }
-            });
-        }
-
-        // SHAPE
-        if (shapeName?.length) {
-            andFilters.push({
-                shape: {
-                    $elemMatch: {
-                        name: { $in: Array.isArray(shapeName) ? shapeName : [shapeName] }
-                    }
-                }
-            });
-        }
-
-        // TEMPLATE
-        if (templateName?.length) {
-            andFilters.push({
-                template: {
-                    $elemMatch: {
-                        name: { $in: Array.isArray(templateName) ? templateName : [templateName] }
-                    }
-                }
-            });
-        }
-
-        const filterQuery = andFilters.length ? { $and: andFilters } : {};
-
-        // SAFE SORTING
-        const sortField = ALLOWED_SORT_FIELDS.includes(sortBy) ? sortBy : "createdAt";
-        const sort = { [sortField]: sortOrder === "asc" ? 1 : -1 };
-
-        // PAGINATION
-        const pageNum = Math.max(parseInt(page), 1);
-        const limitNum = Math.max(parseInt(limit), 1);
-        const skip = (pageNum - 1) * limitNum;
-
-        const [products, total] = await Promise.all([
-            Products.find(filterQuery)
-                .sort(sort)
-                .skip(skip)
-                .limit(limitNum),
-            Products.countDocuments(filterQuery)
-        ]);
-
-        res.status(200).json({
-            products,
-            total,
-            page: pageNum,
-            limit: limitNum,
-            totalPages: Math.ceil(total / limitNum)
-        });
-
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+    res.status(200).json({
+      products,
+      total,
+      page: pageNum,
+      limit: limitNum,
+      totalPages: Math.ceil(total / limitNum)
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 }

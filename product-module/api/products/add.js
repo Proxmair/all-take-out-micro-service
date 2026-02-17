@@ -20,7 +20,16 @@ export default async function handler(req, res) {
     if (!adminUser || adminUser.role !== "admin") {
       return res.status(403).json({ error: "Only admin can add products" });
     }
-    const product = await Products.create(productData);
+    // Only allow fields from the new schema
+    const allowedFields = [
+      "categoryId", "subCategoryId", "name", "materials", "sizes", "shapes", "qualities",
+      "image", "imageSize", "variants", "templateDragSize"
+    ];
+    const newProductData = {};
+    for (const key of allowedFields) {
+      if (productData && productData[key] !== undefined) newProductData[key] = productData[key];
+    }
+    const product = await Products.create(newProductData);
     res.status(201).json({ product });
   } catch (err) {
     res.status(500).json({ error: err.message });

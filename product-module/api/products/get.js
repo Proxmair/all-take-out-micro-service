@@ -14,6 +14,13 @@ export default async function handler(req, res) {
   }
   try {
     await connectDB();
+    // Optionally support query by id
+    const { productId } = req.query;
+    if (productId) {
+      const product = await Products.findById(productId);
+      if (!product) return res.status(404).json({ error: "Product not found" });
+      return res.status(200).json({ product });
+    }
     const products = await Products.find();
     res.status(200).json({ products });
   } catch (err) {
