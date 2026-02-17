@@ -1,0 +1,665 @@
+{
+  "info": {
+    "_postman_id": "f6230257-17fc-4a67-b13a-f5a2ac895b4d",
+    "name": "All Take out",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "19158507",
+    "_collection_link": "https://go.postman.co/collection/19158507-f6230257-17fc-4a67-b13a-f5a2ac895b4d?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Sign up",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"test3@gmail.com\",\r\n    \"password\": \"12345\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/auth/signup",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "signup"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Log in",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"test3@gmail.com\",\r\n    \"password\": \"12345\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/auth/login",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Guest Sign up",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"isGuest\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/auth/signup",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "signup"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"test@gmail.com\",\r\n    \"password\": \"12345\"\r\n}"
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/auth/get-user",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "get-user"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create VIP User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"vipuser1@gmail.com\",\r\n    \"password\": \"12345\",\r\n    \"adminId\": \"696831efb8e0e41d3abf5690\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/auth/admin/create-vip-user",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "admin",
+                "create-vip-user"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Clear DB",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"adminId\": \"696831efb8e0e41d3abf5690\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/auth/admin/clear-db",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "admin",
+                "clear-db"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "add",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"title\": \"Social Medial Labels\", \r\n    \"link\": \"https://takeout.appcostcalculator.ca/product-category/social-media-labels/\",\r\n    \"adminId\": \"696831efb8e0e41d3abf5690\",\r\n    \"misc\": {}\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/categories/add",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "categories",
+                "add"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "add subcategories",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"categoryId\": \"696bc301b76d9f40ea660dc6\",\r\n    \"subCategory\": [\r\n        {\r\n            \"image\": \"sample image string\",\r\n            \"title\": \"Facebook Labels\",\r\n            \"description\": \"Sample Description\",\r\n            \"link\": \"https://takeout.appcostcalculator.ca/product/facebook-labels/\",\r\n            \"misc\": {}\r\n        }\r\n    ],\r\n    \"adminId\": \"696831efb8e0e41d3abf5690\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/categories/add-subcategory",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "categories",
+                "add-subcategory"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"categoryId\": \"696bc04a2f7a758b97dcf32b\",\r\n    \"adminId\": \"696831efb8e0e41d3abf5690\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/categories/delete",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "categories",
+                "delete"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete subcategory",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"categoryId\": \"696bc301b76d9f40ea660dc6\",\r\n    \"adminId\": \"696831efb8e0e41d3abf5690\",\r\n    \"subCategoryId\": \"696bc3102c375a8ac21b403f\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/categories/delete-subcategory",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "categories",
+                "delete-subcategory"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "edit",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"categoryId\": \"696bbf8f9abb913669e02511\",\r\n    \"title\": \"Social Medial Labels Updated\",\r\n    // \"link\": \"\",\r\n    \"adminId\": \"696831efb8e0e41d3abf5690\",\r\n    \"misc\": {}\r\n} // only update the paramerter that are given in this case link will not update",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/categories/edit",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "categories",
+                "edit"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "edit category",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"categoryId\": \"696bc301b76d9f40ea660dc6\",\r\n    \"subCategoryId\": \"696bc62459572098be2df44f\",\r\n    \"adminId\": \"696831efb8e0e41d3abf5690\",\r\n    \"subCategoryData\": {\r\n        \"image\": \"sample updated image string\",\r\n        \"title\": \"sample updated title\",\r\n        \"misc\": {}\r\n    } // will replace the whole object with this updated object\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/categories/edit-subcategory",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "categories",
+                "edit-subcategory"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "list",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"categoryId\": \"696bc301b76d9f40ea660dc6\",\r\n    \"subCategoryId\": \"696bc62459572098be2df44f\",\r\n    \"adminId\": \"696831efb8e0e41d3abf5690\",\r\n    \"subCategoryData\": {\r\n        \"image\": \"sample updated image string\",\r\n        \"title\": \"sample updated title\",\r\n        \"misc\": {}\r\n    }\r\n}"
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/categories/list",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "categories",
+                "list"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get-subcategories",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/categories/get-subcategories?categoryId=696bbf8f9abb913669e02511",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "categories",
+                "get-subcategories"
+              ],
+              "query": [
+                {
+                  "key": "categoryId",
+                  "value": "696bbf8f9abb913669e02511"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "add",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"adminId\": \"696831efb8e0e41d3abf5690\",\r\n  \"productData\": {\r\n    \"categoryId\": \"6975ffc8945e91e057003ef8\",\r\n    \"subCategoryId\": \"213123\",\r\n    \"name\": \"Template 1\",\r\n    \"materials\": [\"Gloss\", \"Vinyl\"],\r\n    \"sizes\": [\"2x2\", \"3x3\", \"4x3\", \"4x5\"],\r\n    \"shapes\": [\"Square\"],\r\n    \"qualities\": [100, 250, 500, 750, 1000, 1500, 2000],\r\n    \"image\": \"image-file-path-or-url.jpg\",\r\n    \"imageSize\": { \"renderedWidth\": 491, \"renderedHeight\": 300 },\r\n    \"variants\": [\r\n      { \"material\": \"Gloss\", \"size\": \"2x2\", \"shape\": \"Square\", \"quality\": 100, \"price\": 269 },\r\n      { \"material\": \"Gloss\", \"size\": \"2x2\", \"shape\": \"Square\", \"quality\": 250, \"price\": 120 },\r\n      { \"material\": \"Gloss\", \"size\": \"2x2\", \"shape\": \"Square\", \"quality\": 500, \"price\": 110 }\r\n    ],\r\n    \"templateDragSize\": [\r\n      {\r\n        \"xCordination\": 157,\r\n        \"yCordination\": 129,\r\n        \"width\": 328,\r\n        \"height\": 150,\r\n        \"rotate\": 0\r\n      }\r\n    ]\r\n  }\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/products/add",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "add"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "edit",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"adminId\": \"696831efb8e0e41d3abf5690\",\r\n    \"productId\": \"696bce50d6970269b629fe28\",\r\n    \"productData\": {\r\n        \"name\": \"Custom Vinyl Sticker Updated\",\r\n        \"material\": [\r\n            {\r\n                \"name\": \"Matte Vinyl\",\r\n                \"priceChangeFactor\": 0,\r\n                \"priceChangeType\": \"fixed\",\r\n                \"misc\": {}\r\n            },\r\n            {\r\n                \"name\": \"Glossy Vinyl\",\r\n                \"priceChangeFactor\": 10,\r\n                \"priceChangeType\": \"percentage\",\r\n                \"misc\": {}\r\n            },\r\n            {\r\n                \"name\": \"Transparent Vinyl\",\r\n                \"priceChangeFactor\": 15,\r\n                \"priceChangeType\": \"percentage\",\r\n                \"misc\": {}\r\n            }\r\n        ],\r\n        \"size\": [\r\n            {\r\n                \"name\": \"2 x 2 inches\",\r\n                \"priceChangeFactor\": 0,\r\n                \"priceChangeType\": \"fixed\",\r\n                \"misc\": {}\r\n            },\r\n            {\r\n                \"name\": \"3 x 3 inches\",\r\n                \"priceChangeFactor\": 20,\r\n                \"priceChangeType\": \"percentage\",\r\n                \"misc\": {}\r\n            },\r\n            {\r\n                \"name\": \"4 x 4 inches\",\r\n                \"priceChangeFactor\": 35,\r\n                \"priceChangeType\": \"percentage\",\r\n                \"misc\": {}\r\n            }\r\n        ],\r\n        \"shape\": [\r\n            {\r\n                \"name\": \"Square\",\r\n                \"priceChangeFactor\": 0,\r\n                \"priceChangeType\": \"fixed\",\r\n                \"misc\": {}\r\n            },\r\n            {\r\n                \"name\": \"Circle\",\r\n                \"priceChangeFactor\": 5,\r\n                \"priceChangeType\": \"percentage\",\r\n                \"misc\": {}\r\n            },\r\n            {\r\n                \"name\": \"Die Cut\",\r\n                \"priceChangeFactor\": 25,\r\n                \"priceChangeType\": \"percentage\",\r\n                \"misc\": {}\r\n            }\r\n        ],\r\n        \"template\": [\r\n            {\r\n                \"name\": \"Upload Your Design\",\r\n                \"priceChangeFactor\": 0,\r\n                \"priceChangeType\": \"fixed\",\r\n                \"misc\": {}\r\n            },\r\n            {\r\n                \"name\": \"Business Logo\",\r\n                \"priceChangeFactor\": 500,\r\n                \"priceChangeType\": \"fixed\",\r\n                \"misc\": {}\r\n            }\r\n        ],\r\n        \"templateDragSize\": [\r\n            {\r\n                \"xCordination\": 100,\r\n                \"yCordination\": 100,\r\n                \"scale\": 1,\r\n                \"misc\": {}\r\n            },\r\n            {\r\n                \"xCordination\": 140,\r\n                \"yCordination\": 140,\r\n                \"scale\": 1.2,\r\n                \"misc\": {}\r\n            }\r\n        ],\r\n        \"quantity\": 1,\r\n        \"misc\": {}\r\n    }\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/products/edit",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "edit"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/api/products/get",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "get"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"adminId\": \"696831efb8e0e41d3abf5690\",\r\n    \"productId\": \"696bce50d6970269b629fe28\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/products/delete",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "delete"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "listing",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"materialName\": [\"Paper\", \"Plastic\"],\r\n  \"sizeName\": [\"Large\", \"Medium\"],\r\n  \"shapeName\": [\"Round\"],\r\n  \"templateName\": [\"Basic\", \"Premium\"],\r\n  \"sortBy\": \"basePrice\",\r\n  \"sortOrder\": \"asc\",\r\n  \"page\": 1,\r\n  \"limit\": 10\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/products/product-listing",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "product-listing"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cart",
+      "item": [
+        {
+          "name": "Add",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"userId\": \"696835639b94c4373dda8f03\",\r\n  \"productId\": \"6973b63926a2b0c71e2d3c90\",\r\n  \"materialName\": \"Matte Vinyl\",\r\n  \"sizeName\": \"2 x 2 inches\",\r\n  \"shapeName\": \"Square\",\r\n  \"templateName\": \"Upload Your Design\",\r\n  \"quantity\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/cart/add",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "cart",
+                "add"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Checkout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"userId\": \"696835639b94c4373dda8f03\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/cart/checkout",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "cart",
+                "checkout"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remove",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseURL",
+      "value": ""
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ]
+}
