@@ -21,13 +21,17 @@ export default async function handler(req, res) {
   }
   try {
     await connectDB();
-    const form = new formidable.IncomingForm();
+    const form = formidable({ multiples: false });
     form.parse(req, async (err, fields) => {
       if (err) {
         return res.status(400).json({ error: "Form parse error" });
       }
       const { productId } = fields;
-      if (!productId) return res.status(400).json({ error: "Product id is required" });
+      if (!productId) {
+        // Return all products if no productId is provided
+        const products = await Products.find({});
+        return res.status(200).json({ products });
+      }
       const product = await Products.findById(productId);
       if (!product) return res.status(404).json({ error: "Product not found" });
       res.status(200).json({ product });

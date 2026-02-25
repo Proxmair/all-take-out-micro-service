@@ -22,7 +22,7 @@ export default async function handler(req, res) {
   }
   try {
     await connectDB();
-    const form = new formidable.IncomingForm();
+    const form = formidable({ multiples: false });
     form.parse(req, async (err, fields) => {
       if (err) {
         return res.status(400).json({ error: "Form parse error" });
