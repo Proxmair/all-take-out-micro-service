@@ -11,28 +11,50 @@ const VariantSchema = new mongoose.Schema({
 const TemplateDragSizeSchema = new mongoose.Schema({
   xCordination: Number,
   yCordination: Number,
-  width: Number,
-  height: Number,
-  rotate: Number,
-}, { _id: false });
-
-const ImageSizeSchema = new mongoose.Schema({
-  renderedWidth: Number,
-  renderedHeight: Number,
+  scale: Number,
+  misc: mongoose.Schema.Types.Mixed,
 }, { _id: false });
 
 const ProductsSchema = new mongoose.Schema({
   categoryId: { type: mongoose.Schema.Types.ObjectId, ref: "Categories" },
   subCategoryId: { type: String },
   name: { type: String, required: true },
-  materials: [String],
-  sizes: [String],
-  shapes: [String],
-  qualities: [Number],
-  image: { type: String }, // store file path or URL
-  imageSize: ImageSizeSchema,
-  variants: [VariantSchema],
+  image: { type: String },
+  material: [
+    {
+      name: String,
+      priceChangeFactor: Number,
+      priceChangeType: String,
+      misc: mongoose.Schema.Types.Mixed,
+    }
+  ],
+  size: [
+    {
+      name: String,
+      priceChangeFactor: Number,
+      priceChangeType: String,
+      misc: mongoose.Schema.Types.Mixed,
+    }
+  ],
+  shape: [
+    {
+      name: String,
+      priceChangeFactor: Number,
+      priceChangeType: String,
+      misc: mongoose.Schema.Types.Mixed,
+    }
+  ],
+  template: [
+    {
+      name: String,
+      priceChangeFactor: Number,
+      priceChangeType: String,
+      misc: mongoose.Schema.Types.Mixed,
+    }
+  ],
   templateDragSize: [TemplateDragSizeSchema],
+  quantity: { type: Number, default: 1 },
+  misc: mongoose.Schema.Types.Mixed,
 }, { timestamps: true });
 
 export default mongoose.models.Products || mongoose.model("Products", ProductsSchema);
