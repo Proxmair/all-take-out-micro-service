@@ -1,5 +1,12 @@
+import formidable from "formidable";
 import { connectDB } from "../../lib/mongodb.js";
 import Products from "../../module/Products.js";
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
 const ALLOWED_SORT_FIELDS = [
     "createdAt",
@@ -20,43 +27,37 @@ export default async function handler(req, res) {
   }
   try {
     await connectDB();
-    const {
-      materials,
-      sizes,
-      shapes,
-      qualities,
-      sortBy = "createdAt",
-      sortOrder = "desc",
-      page = 1,
-      limit = 20
-    } = req.body;
-
-    const filter = {};
-    if (materials?.length) filter.materials = { $in: materials };
-    if (sizes?.length) filter.sizes = { $in: sizes };
-    if (shapes?.length) filter.shapes = { $in: shapes };
-    if (qualities?.length) filter.qualities = { $in: qualities };
-
-    const sortField = ALLOWED_SORT_FIELDS.includes(sortBy) ? sortBy : "createdAt";
-    const sort = { [sortField]: sortOrder === "asc" ? 1 : -1 };
-    const pageNum = Math.max(parseInt(page), 1);
-    const limitNum = Math.max(parseInt(limit), 1);
-    const skip = (pageNum - 1) * limitNum;
-
-    const [products, total] = await Promise.all([
-      Products.find(filter)
-        .sort(sort)
-        .skip(skip)
-        .limit(limitNum),
-      Products.countDocuments(filter)
-    ]);
-
-    res.status(200).json({
-      products,
-      total,
-      page: pageNum,
-      limit: limitNum,
-      totalPages: Math.ceil(total / limitNum)
+    const form = new formidable.IncomingForm();
+    form.parse(req, async (err, fields) => {
+      if (err) {
+        return res.status(400).json({ error: "Form parse error" });
+      }
+      // Filters for listing
+      const { materials, sizes, shapes, qualities, sortBy, sortOrder, page, limit } = fields;
+      const filter = {};
+      if (materials) filter.materials = { $in: JSON.parse(materials) };
+      if (sizes) filter.sizes = { $in: JSON.parse(sizes) };
+      if (shapes) filter.shapes = { $in: JSON.parse(shapes) };
+      if (qualities) filter.qualities = { $in: JSON.parse(qualities) };
+      const sortField = ALLOWED_SORT_FIELDS.includes(sortBy) ? sortBy : "createdAt";
+      const sort = { [sortField]: sortOrder === "asc" ? 1 : -1 };
+      const pageNum = Math.max(parseInt(page || 1), 1);
+      const limitNum = Math.max(parseInt(limit || 20), 1);
+      const skip = (pageNum - 1) * limitNum;
+      const [products, total] = await Promise.all([
+        Products.find(filter)
+          .sort(sort)
+          .skip(skip)
+          .limit(limitNum),
+        Products.countDocuments(filter)
+      ]);
+      res.status(200).json({
+        products,
+        total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum)
+      });
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
