@@ -8,56 +8,57 @@ export const config = {
   },
 };
 
-const ALLOWED_SORT_FIELDS = [
-    "createdAt",
-    "updatedAt",
-    "name"
-];
-
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, GET, DELETE, PUT, OPTIONS");
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization"
-  );
-  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
+
   try {
     await connectDB();
+
     const form = formidable({ multiples: false });
+
     form.parse(req, async (err, fields) => {
       if (err) {
         return res.status(400).json({ error: "Form parse error" });
       }
-      // Filters for listing
-      const { materials, sizes, shapes, qualities, sortBy, sortOrder, page, limit } = fields;
+
+      const getSingle = (field) =>
+        Array.isArray(field) ? field[0] : field;
+
+      const materialName = getSingle(fields.materialName);
+      const sizeName = getSingle(fields.sizeName);
+      const shapeName = getSingle(fields.shapeName);
+      const templateName = getSingle(fields.templateName);
+
       const filter = {};
-      if (materials) filter.materials = { $in: JSON.parse(materials) };
-      if (sizes) filter.sizes = { $in: JSON.parse(sizes) };
-      if (shapes) filter.shapes = { $in: JSON.parse(shapes) };
-      if (qualities) filter.qualities = { $in: JSON.parse(qualities) };
-      const sortField = ALLOWED_SORT_FIELDS.includes(sortBy) ? sortBy : "createdAt";
-      const sort = { [sortField]: sortOrder === "asc" ? 1 : -1 };
-      const pageNum = Math.max(parseInt(page || 1), 1);
-      const limitNum = Math.max(parseInt(limit || 20), 1);
-      const skip = (pageNum - 1) * limitNum;
-      const [products, total] = await Promise.all([
-        Products.find(filter)
-          .sort(sort)
-          .skip(skip)
-          .limit(limitNum),
-        Products.countDocuments(filter)
-      ]);
-      res.status(200).json({
-        products,
-        total,
-        page: pageNum,
-        limit: limitNum,
-        totalPages: Math.ceil(total / limitNum)
-      });
+
+      const parseComma = (value) =>
+        value.split(",").map((v) => v.trim()).filter(Boolean);
+
+      if (materialName) {
+        filter.material = { $in: parseComma(materialName) };
+      }
+
+      if (sizeName) {
+        filter.sizes = { $in: parseComma(sizeName) };
+      }
+
+      if (shapeName) {
+        filter.shapes = { $in: parseComma(shapeName) };
+      }
+
+      if (templateName) {
+        filter.template = { $in: parseComma(templateName) };
+      }
+
+      const products = await Products.find(filter);
+
+      res.status(200).json({ products });
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
