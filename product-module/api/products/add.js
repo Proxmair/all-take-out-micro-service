@@ -31,92 +31,97 @@ export default async function handler(req, res) {
     await connectDB();
     const form = formidable({ multiples: true });
     form.parse(req, async (err, fields, files) => {
-      if (err) {
-        return res.status(400).json({ error: "Form parse error" });
-      }
-      console.log('fields', fields);
-      const { adminId } = fields;
+      if (err) return res.status(400).json({ error: "Form parse error" });
+
+      const { adminId, name } = fields;
+
       const adminUser = await User.findById(adminId);
       if (!adminUser || adminUser.role !== "admin") {
         return res.status(403).json({ error: "Only admin can add products" });
       }
-      // Handle image upload via form-data (not part of productData)
-      let imageUrl = undefined;
+
+      if (!name) {
+        return res.status(400).json({ error: "Product name is required" });
+      }
+
+      // -------- IMAGE UPLOAD --------
+      let imageUrl;
       if (files.image) {
-        try {
+        const file = Array.isArray(files.image)
+          ? files.image[0]
+          : files.image;
 
-          const file = Array.isArray(files.image)
-            ? files.image[0]
-            : files.image;
+        const result = await cloudinary.uploader.upload(
+          file.filepath,
+          { folder: "products" }
+        );
 
-          const result = await cloudinary.uploader.upload(
-            file.filepath,
-            {
-              folder: "products",
-            }
-          );
-
-          imageUrl = result.secure_url;
-
-        } catch (e) {
-          return res.status(500).json({
-            error: "Image upload failed",
-            details: e.message,
-          });
-        }
+        imageUrl = result.secure_url;
       }
-      // Support productData as a single JSON string field
-      let parsedProductData = {};
-      if (fields.productData !== undefined) {
-        let value = Array.isArray(fields.productData) ? fields.productData[0] : fields.productData;
-        // Remove extra quotes and unescape if present
-        if (typeof value === "string" && value.startsWith('"') && value.endsWith('"')) {
-          value = value.slice(1, -1);
-        }
-        // Replace escaped quotes
-        value = value.replace(/\\"/g, '"');
-        try {
-          parsedProductData = JSON.parse(value);
-        } catch (e) {
-          console.error('JSON parse error:', e, value);
-          parsedProductData = {};
-        }
-      }
-      // Build productData from fields
-      const allowedFields = [
-        "categoryId", "subCategoryId", "name", "materials", "sizes", "shapes", "qualities",
-        "imageSize", "variants", "templateDragSize", "material", "size", "shape", "template", "quantity", "misc"
-      ];
-      const productData = { ...parsedProductData };
-      console.log('initial productData', productData);
-      for (const key of allowedFields) {
-        if (fields[key] !== undefined && productData[key] === undefined) {
-          let value = Array.isArray(fields[key]) ? fields[key][0] : fields[key];
+
+      // -------- SIMPLE ARRAY FIELDS --------
+      const material = fields["material[]"] || [];
+      const sizes = fields["sizes[]"] || [];
+      const shapes = fields["shapes[]"] || [];
+      const qualitiesRaw = fields["qualities[]"] || [];
+
+      const qualities = Array.isArray(qualitiesRaw)
+        ? qualitiesRaw.map(q => Number(q))
+        : [Number(qualitiesRaw)];
+
+      const originalSize = fields["originalSize[]"] || [];
+
+      // -------- DIMENSIONS (parse JSON-like string) --------
+      let dimentions = [];
+      if (fields["dimentions[]"]) {
+        const dimArray = Array.isArray(fields["dimentions[]"])
+          ? fields["dimentions[]"]
+          : [fields["dimentions[]"]];
+
+        dimentions = dimArray.map(d => {
           try {
-            productData[key] = JSON.parse(value);
+            return JSON.parse(d);
           } catch {
-            productData[key] = value;
+            return {};
           }
-        }
+        });
       }
-      // Map productData fields to match schema
-      if (productData.material) productData.material = productData.material;
-      if (productData.size) productData.size = productData.size;
-      if (productData.shape) productData.shape = productData.shape;
-      if (productData.template) productData.template = productData.template;
-      if (productData.quantity) productData.quantity = Number(productData.quantity);
-      if (productData.misc) productData.misc = productData.misc;
-      // Remove plural fields if present
-      delete productData.materials;
-      delete productData.sizes;
-      delete productData.shapes;
-      delete productData.qualities;
-      // Ensure 'name' is present and valid
-      if (!productData.name || typeof productData.name !== "string" || !productData.name.trim()) {
-        return res.status(400).json({ error: "Product name is required." });
+
+      // -------- VARIANTS --------
+      let variants = [];
+      if (fields["variants[]"]) {
+        const variantArray = Array.isArray(fields["variants[]"])
+          ? fields["variants[]"]
+          : [fields["variants[]"]];
+
+        variants = variantArray.map(v => {
+          try {
+            const parsed = JSON.parse(v);
+            return {
+              ...parsed,
+              price: Number(parsed.price),
+              quality: Number(parsed.quality),
+            };
+          } catch {
+            return {};
+          }
+        });
       }
-      if (imageUrl) productData.image = imageUrl;
-      const product = await Products.create(productData);
+
+      const product = await Products.create({
+        name,
+        image: imageUrl,
+        material: Array.isArray(material) ? material : [material],
+        sizes: Array.isArray(sizes) ? sizes : [sizes],
+        shapes: Array.isArray(shapes) ? shapes : [shapes],
+        qualities,
+        originalSize: Array.isArray(originalSize)
+          ? originalSize
+          : [originalSize],
+        dimentions,
+        variants,
+      });
+
       res.status(201).json({ product });
     });
   } catch (err) {
