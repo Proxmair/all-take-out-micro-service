@@ -5,9 +5,9 @@ import User from "../../module/User.js";
 import { v2 as cloudinary } from "cloudinary";
 
 cloudinary.config({
-  cloud_name: 'proxmaircloud',
-  api_key: '643536941871954',
-  api_secret: 'rA1Tc-OoID6r9Jve3qTFRvP8SRY',
+  cloud_name: "proxmaircloud",
+  api_key: "643536941871954",
+  api_secret: "rA1Tc-OoID6r9Jve3qTFRvP8SRY",
 });
 
 export const config = {
@@ -19,32 +19,37 @@ export const config = {
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, GET, DELETE, PUT, OPTIONS");
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization"
-  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.setHeader("Access-Control-Allow-Credentials", "true");
+
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
+
   try {
     await connectDB();
     const form = formidable({ multiples: true });
+
     form.parse(req, async (err, fields, files) => {
       if (err) return res.status(400).json({ error: "Form parse error" });
 
-      const { adminId, name } = fields;
+      // ✅ Normalize single fields
+      const getSingle = (field) =>
+        Array.isArray(field) ? field[0] : field;
+
+      const adminId = getSingle(fields.adminId);
+      const name = getSingle(fields.name);
 
       const adminUser = await User.findById(adminId);
       if (!adminUser || adminUser.role !== "admin") {
         return res.status(403).json({ error: "Only admin can add products" });
       }
 
-      if (!name) {
+      if (!name || typeof name !== "string") {
         return res.status(400).json({ error: "Product name is required" });
       }
 
-      // -------- IMAGE UPLOAD --------
+      // ✅ IMAGE UPLOAD
       let imageUrl;
       if (files.image) {
         const file = Array.isArray(files.image)
@@ -59,65 +64,69 @@ export default async function handler(req, res) {
         imageUrl = result.secure_url;
       }
 
-      // -------- SIMPLE ARRAY FIELDS --------
-      const material = fields["material[]"] || [];
-      const sizes = fields["sizes[]"] || [];
-      const shapes = fields["shapes[]"] || [];
-      const qualitiesRaw = fields["qualities[]"] || [];
+      // ✅ ARRAY HELPERS
+      const normalizeArray = (field) => {
+        if (!field) return [];
+        return Array.isArray(field) ? field : [field];
+      };
 
-      const qualities = Array.isArray(qualitiesRaw)
-        ? qualitiesRaw.map(q => Number(q))
-        : [Number(qualitiesRaw)];
+      const material = normalizeArray(fields["material[]"]);
+      const sizes = normalizeArray(fields["sizes[]"]);
+      const shapes = normalizeArray(fields["shapes[]"]);
+      const originalSize = normalizeArray(fields["originalSize[]"]);
 
-      const originalSize = fields["originalSize[]"] || [];
+      const qualities = normalizeArray(fields["qualities[]"]).map((q) =>
+        Number(q)
+      );
 
-      // -------- DIMENSIONS (parse JSON-like string) --------
+      // ✅ DIMENSIONS (must be valid JSON in request)
       let dimentions = [];
-      if (fields["dimentions[]"]) {
-        const dimArray = Array.isArray(fields["dimentions[]"])
-          ? fields["dimentions[]"]
-          : [fields["dimentions[]"]];
+      const rawDims = normalizeArray(fields["dimentions[]"]);
 
-        dimentions = dimArray.map(d => {
+      dimentions = rawDims
+        .map((d) => {
           try {
-            return JSON.parse(d);
+            const parsed = JSON.parse(d);
+            return {
+              xCordination: Number(parsed.xCordination) || 0,
+              yCordination: Number(parsed.yCordination) || 0,
+              scale: Number(parsed.scale) || 1,
+            };
           } catch {
-            return {};
+            return null;
           }
-        });
-      }
+        })
+        .filter(Boolean);
 
-      // -------- VARIANTS --------
+      // ✅ VARIANTS (must be valid JSON in request)
       let variants = [];
-      if (fields["variants[]"]) {
-        const variantArray = Array.isArray(fields["variants[]"])
-          ? fields["variants[]"]
-          : [fields["variants[]"]];
+      const rawVariants = normalizeArray(fields["variants[]"]);
 
-        variants = variantArray.map(v => {
+      variants = rawVariants
+        .map((v) => {
           try {
             const parsed = JSON.parse(v);
             return {
-              ...parsed,
-              price: Number(parsed.price),
+              material: parsed.material,
+              size: parsed.size,
+              shape: parsed.shape,
               quality: Number(parsed.quality),
+              price: Number(parsed.price),
             };
           } catch {
-            return {};
+            return null;
           }
-        });
-      }
+        })
+        .filter(Boolean);
 
       const product = await Products.create({
         name,
         image: imageUrl,
-        material: Array.isArray(material) ? material : [material],
-        sizes: Array.isArray(sizes) ? sizes : [sizes],
-        shapes: Array.isArray(shapes) ? shapes : [shapes],
+        material,
+        sizes,
+        shapes,
         qualities,
-        originalSize: Array.isArray(originalSize)
-          ? originalSize
-          : [originalSize],
+        originalSize,
         dimentions,
         variants,
       });
