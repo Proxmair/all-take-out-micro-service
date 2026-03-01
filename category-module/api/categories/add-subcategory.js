@@ -1,7 +1,6 @@
 import formidable from "formidable";
 import { connectDB } from "../../lib/mongodb.js";
-import Category from "../../module/Category.js";
-import SubCategory from "../../module/SubCategory.js";
+import Categories from "../../module/Categories.js";
 import User from "../../module/User.js";
 import { v2 as cloudinary } from "cloudinary";
 
@@ -45,23 +44,21 @@ export default async function handler(req, res) {
       const link = getSingle(fields.link);
       const adminId = getSingle(fields.adminId);
 
+      if (!categoryId || !title) {
+        return res
+          .status(400)
+          .json({ error: "categoryId and title are required" });
+      }
+
       // ✅ Validate admin
       const adminUser = await User.findById(adminId);
       if (!adminUser || adminUser.role !== "admin") {
-        return res.status(403).json({ error: "Only admin can add subcategory" });
+        return res
+          .status(403)
+          .json({ error: "Only admin can create subcategories" });
       }
 
-      if (!categoryId || !title) {
-        return res.status(400).json({ error: "categoryId and title are required" });
-      }
-
-      // ✅ Check category exists
-      const category = await Category.findById(categoryId);
-      if (!category) {
-        return res.status(404).json({ error: "Category not found" });
-      }
-
-      // ✅ Upload image
+      // ✅ Upload image (optional)
       let imageUrl;
 
       if (files.image) {
@@ -77,16 +74,26 @@ export default async function handler(req, res) {
         imageUrl = result.secure_url;
       }
 
-      // ✅ Create subcategory
-      const subCategory = await SubCategory.create({
-        categoryId,
+      // ✅ Build subCategory object
+      const subCategory = {
         title,
         description,
         link,
         image: imageUrl,
-      });
+      };
 
-      res.status(201).json({ subCategory });
+      // ✅ Push into category
+      const updated = await Categories.findByIdAndUpdate(
+        categoryId,
+        { $push: { subCategories: subCategory } },
+        { new: true }
+      );
+
+      if (!updated) {
+        return res.status(404).json({ error: "Category not found" });
+      }
+
+      res.status(200).json({ category: updated });
     });
   } catch (err) {
     res.status(500).json({ error: err.message });

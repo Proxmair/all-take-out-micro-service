@@ -54,12 +54,12 @@ export default async function handler(req, res) {
       // ✅ Validate admin
       const adminUser = await User.findById(adminId);
       if (!adminUser || adminUser.role !== "admin") {
-        return res
-          .status(403)
-          .json({ error: "Only admin can edit subcategories" });
+        return res.status(403).json({
+          error: "Only admin can edit subcategories",
+        });
       }
 
-      // ✅ Handle image upload (optional)
+      // ✅ Upload new image (optional)
       let imageUrl;
 
       if (files.image) {
@@ -75,24 +75,26 @@ export default async function handler(req, res) {
         imageUrl = result.secure_url;
       }
 
-      // ✅ Build update object dynamically
-      const updateData = {};
+      // ✅ Build dynamic update object
+      const updateFields = {};
 
-      if (title) updateData["subCategories.$.title"] = title;
-      if (description) updateData["subCategories.$.description"] = description;
-      if (link) updateData["subCategories.$.link"] = link;
-      if (imageUrl) updateData["subCategories.$.image"] = imageUrl;
+      if (title) updateFields["subCategories.$.title"] = title;
+      if (description)
+        updateFields["subCategories.$.description"] = description;
+      if (link) updateFields["subCategories.$.link"] = link;
+      if (imageUrl)
+        updateFields["subCategories.$.image"] = imageUrl;
 
       const updated = await Categories.findOneAndUpdate(
         { _id: categoryId, "subCategories._id": subCategoryId },
-        { $set: updateData },
+        { $set: updateFields },
         { new: true }
       );
 
       if (!updated) {
-        return res
-          .status(404)
-          .json({ error: "Category or subcategory not found" });
+        return res.status(404).json({
+          error: "Category or subCategory not found",
+        });
       }
 
       res.status(200).json({ category: updated });
