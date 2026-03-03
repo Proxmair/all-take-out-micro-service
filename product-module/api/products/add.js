@@ -120,6 +120,8 @@ export default async function handler(req, res) {
         .filter(Boolean);
 
       const product = await Products.create({
+        categoryId: fields.categoryId,
+        subCategoryId: fields.subCategoryId[0],
         name,
         image: imageUrl,
         material,
