@@ -37,24 +37,37 @@ export default async function handler(req, res) {
 
       const filter = {};
 
-      const parseComma = (value) =>
-        value.split(",").map((v) => v.trim()).filter(Boolean);
+      const parseValues = (value) => {
+        if (!value) return [];
 
-      if (materialName) {
-        filter.material = { $in: parseComma(materialName) };
-      }
+        let cleaned = value.trim();
 
-      if (sizeName) {
-        filter.sizes = { $in: parseComma(sizeName) };
-      }
+        if (cleaned.startsWith("[") && cleaned.endsWith("]")) {
+          cleaned = cleaned.slice(1, -1);
+        }
 
-      if (shapeName) {
-        filter.shapes = { $in: parseComma(shapeName) };
-      }
+        return cleaned
+          .split(",")
+          .map((v) => v.trim())
+          .filter(Boolean);
+      };
 
-      if (templateName) {
-        filter.template = { $in: parseComma(templateName) };
-      }
+      const buildFilter = (field, value) => {
+        const values = parseValues(value);
+        if (!values.length) return;
+
+        filter.$or = filter.$or || [];
+
+        values.forEach((v) => {
+          filter.$or.push({ [field]: v });
+          filter.$or.push({ [field]: { $regex: `"${v}"`, $options: "i" } });
+        });
+      };
+
+      if (materialName) buildFilter("material", materialName);
+      if (sizeName) buildFilter("sizes", sizeName);
+      if (shapeName) buildFilter("shapes", shapeName);
+      if (templateName) buildFilter("template", templateName);
 
       const products = await Products.find(filter);
 
