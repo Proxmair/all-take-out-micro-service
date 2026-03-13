@@ -7,7 +7,7 @@ const ProductsSchema = new mongoose.Schema({
   material: String,
   sizes: String,
   shapes: String,
-  qualities: Number,
+  qualities: String,
   name: String,
   originalSize: String,      
   dimentions: String,

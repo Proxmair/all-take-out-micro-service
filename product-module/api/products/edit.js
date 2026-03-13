@@ -80,7 +80,7 @@ export default async function handler(req, res) {
         sizes: JSON.stringify(fields.sizes || fields["sizes[]"]),
         shapes: JSON.stringify(fields.shapes || fields["shapes[]"]),
 
-        qualities: Number(getSingle(fields.qualities || fields["qualities[]"])),
+        qualities: JSON.stringify(fields.qualities || fields["qualities[]"]),
 
         originalSize: JSON.stringify(fields.originalSize || fields["originalSize[]"]),
 
