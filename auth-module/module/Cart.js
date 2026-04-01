@@ -7,36 +7,18 @@ const CartItemSchema = new mongoose.Schema(
       ref: "Products",
       required: true,
     },
-    productName: String,
-    basePrice: Number,
-    material: {
-      name: String,
-      priceChangeFactor: Number,
-      priceChangeType: String,
-    },
-    size: {
-      name: String,
-      priceChangeFactor: Number,
-      priceChangeType: String,
-    },
-    shape: {
-      name: String,
-      priceChangeFactor: Number,
-      priceChangeType: String,
-    },
-    template: {
-      name: String,
-      priceChangeFactor: Number,
-      priceChangeType: String,
-    },
+    name: String,
+    thumbnail: String,
+    dimensions: String,
+    price: String,
     quantity: {
-      type: Number,
-      default: 1,
+      type: String,
+      default: "1",
     },
-    finalPrice: {
-      type: Number,
-      required: true,
-    },
+    customization: String,
+    variant: String,
+    couponCode: String,
+    editedImage: String,
   },
   { _id: true }
 );
@@ -46,8 +28,8 @@ const CartSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
     },
+    sessionId: String,
     items: [CartItemSchema],
     totalItems: {
       type: Number,

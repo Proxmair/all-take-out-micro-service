@@ -10,19 +10,31 @@ export default async function handler(req, res) {
     "Content-Type, Authorization"
   );
   res.setHeader("Access-Control-Allow-Credentials", "true");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
   try {
     await connectDB();
 
-    const { userId } = req.body;
-    if (!userId) {
-      return res.status(400).json({ error: "Missing userId field" });
+    const { userId, sessionId, sessionID } = req.body;
+    const activeSessionId = sessionId || sessionID || "";
+
+    if (!userId && !activeSessionId) {
+      return res.status(400).json({ error: "Missing userId or sessionId field" });
     }
 
-    const cart = await Cart.findOne({ userId, status: "active" });
+    const cart = await Cart.findOne({
+      status: "active",
+      ...(userId ? { userId } : { sessionId: activeSessionId }),
+    });
     if (!cart || !cart.items.length)
       return res.status(400).json({ error: "Cart empty" });
-
-    // OPTIONAL: revalidate prices here
 
     cart.status = "checked_out";
     await cart.save();

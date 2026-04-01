@@ -11,22 +11,39 @@ export default async function handler(req, res) {
     "Content-Type, Authorization"
   );
   res.setHeader("Access-Control-Allow-Credentials", "true");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
   try {
     await connectDB();
 
-    const { userId, itemId } = req.body;
-    if (!userId || !itemId) {
+    const { userId, sessionId, sessionID, itemId } = req.body;
+    const activeSessionId = sessionId || sessionID || "";
+
+    if ((!userId && !activeSessionId) || !itemId) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const cart = await Cart.findOne({ userId, status: "active" });
+    const cart = await Cart.findOne({
+      status: "active",
+      ...(userId ? { userId } : { sessionId: activeSessionId }),
+    });
     if (!cart) return res.status(404).json({ error: "Cart not found" });
 
     const item = cart.items.id(itemId);
     if (!item) return res.status(404).json({ error: "Cart item not found" });
 
-    cart.totalItems -= item.quantity;
-    cart.totalPrice -= item.finalPrice;
+    const quantity = Number(item.quantity) || 0;
+    const unitPrice = Number(item.price) || 0;
+
+    cart.totalItems = Math.max(0, cart.totalItems - quantity);
+    cart.totalPrice = Math.max(0, cart.totalPrice - quantity * unitPrice);
 
     cart.items.pull(itemId);
     await cart.save();
