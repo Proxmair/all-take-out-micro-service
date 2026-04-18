@@ -15,6 +15,7 @@ export default async function handler(req, res) {
   }
   // Try to get token from cookie or Authorization header
   const token = req.cookies?.token || req.headers["authorization"]?.replace("Bearer ", "");
+  const { id } = req.body;
 
   if (!token) {
     return res.status(401).json({ error: "No token provided" });
@@ -22,8 +23,9 @@ export default async function handler(req, res) {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "dev_secret_key");
+    const userId = id || decoded.id;
     await connectDB();
-    const user = await User.findById(decoded.id).select("-password");
+    const user = await User.findById(userId).select("-password");
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
