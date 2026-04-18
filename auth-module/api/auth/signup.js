@@ -19,7 +19,7 @@ export default async function handler(req, res) {
   try {
     await connectDB();
 
-    let { email, password, isGuest } = req.body;
+    let { email, password, isGuest, phone, name } = req.body;
 
     if (isGuest) {
       const guest = generateGuestUser();
@@ -41,6 +41,8 @@ export default async function handler(req, res) {
     const user = await User.create({
       email,
       password,
+      phone, 
+      name
     });
 
     if (!user) {
