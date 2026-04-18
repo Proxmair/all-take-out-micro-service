@@ -1,4 +1,3 @@
-import jwt from "jsonwebtoken";
 import User from "../../module/User.js";
 import { connectDB } from "../../lib/mongodb.js";
 
@@ -9,21 +8,13 @@ export default async function handler(req, res) {
     "Access-Control-Allow-Headers",
     "Content-Type, Authorization"
   );
-  res.setHeader("Access-Control-Allow-Credentials", "true");
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
-  // Try to get token from cookie or Authorization header
-  const token = req.cookies?.token || req.headers["authorization"]?.replace("Bearer ", "");
-  const { id } = req.body;
-
-  if (!token) {
-    return res.status(401).json({ error: "No token provided" });
-  }
-
+  
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "dev_secret_key");
-    const userId = id || decoded.id;
+    const { id } = req.body;
+    const userId = id;
     await connectDB();
     const user = await User.findById(userId).select("-password");
     if (!user) {
@@ -34,9 +25,9 @@ export default async function handler(req, res) {
       email: user.email,
       isGuest: false,
       role: user.role,
-      token,
     });
   } catch (err) {
+    console.log('error', err)
     res.status(401).json({ error: "Invalid token" });
   }
 }
