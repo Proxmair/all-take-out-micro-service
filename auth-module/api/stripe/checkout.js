@@ -1,6 +1,8 @@
+import { generateGuestUser } from "../../lib/generate-guest.js";
 import { connectDB } from "../../lib/mongodb.js";
 import Order from "../../module/Order.js";
 import Stripe from "stripe";
+import User from "../../module/User.js";
 
 console.log("🚀 API LOADED");
 
@@ -51,12 +53,24 @@ export default async function handler(req, res) {
       total: order?.total,
     });
 
-    if (!id || !customer?.email || !order?.total) {
+    if (!customer?.email || !order?.total) {
       console.log("❌ Missing fields");
       return res.status(400).json({
         success: false,
         message: "Missing required fields",
       });
+    }
+    let userId = id;
+
+    if(!userId) {
+      const {email,password,name,phone} = generateGuestUser();
+      const newUser = await User.create({
+            email,
+            password,
+            phone, 
+            name
+      });
+      userId = newUser._id;
     }
 
     console.log("💳 Creating Stripe PaymentIntent...");
@@ -69,7 +83,7 @@ export default async function handler(req, res) {
       payment_method: "pm_card_visa",
       confirm: true,
       metadata: {
-        userId: id,
+        userId: userId,
         productId: order.productId,
         productName: order.name,
       },
@@ -80,7 +94,7 @@ export default async function handler(req, res) {
     console.log("📝 Creating Order in DB...");
 
     const newOrder = await Order.create({
-      userId: id,
+      userId: userId,
       customer,
       shipping,
       payment: {
