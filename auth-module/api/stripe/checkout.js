@@ -4,15 +4,17 @@ import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET || "");
 
-export default async function handler(req, res) {
-  // 🌍 GLOBAL CORS
+const setCors = (res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS, GET");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+};
 
-  // ⚡ MUST handle preflight FIRST
+export default async function handler(req, res) {
+  setCors(res);
+
   if (req.method === "OPTIONS") {
-    return res.status(200).end();
+    return res.status(200).json({});
   }
 
   if (req.method !== "POST") {
@@ -27,14 +29,7 @@ export default async function handler(req, res) {
 
     const { id, customer, shipping, payment, order } = req.body;
 
-    if (!id) {
-      return res.status(400).json({
-        success: false,
-        message: "User id is required",
-      });
-    }
-
-    if (!customer?.email || !order?.total) {
+    if (!id || !customer?.email || !order?.total) {
       return res.status(400).json({
         success: false,
         message: "Missing required fields",
@@ -45,11 +40,9 @@ export default async function handler(req, res) {
       amount: Math.round(order.total * 100),
       currency: "usd",
       receipt_email: customer.email,
-
       payment_method_types: ["card"],
       payment_method: "pm_card_visa",
       confirm: true,
-
       metadata: {
         userId: id,
         productId: order.productId,
@@ -72,7 +65,6 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       success: true,
-      message: "Payment successful",
       paymentId: paymentIntent.id,
       orderId: newOrder._id,
       status: paymentIntent.status,
@@ -80,7 +72,7 @@ export default async function handler(req, res) {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error?.raw?.message || error.message || "Payment failed",
+      message: error.message,
     });
   }
 }
