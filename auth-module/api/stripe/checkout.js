@@ -4,7 +4,7 @@ import { connectDB } from "../../lib/mongodb.js";
 import Order from "../../module/Order.js";
 import Stripe from "stripe";
 
-const stripe = new Stripe(procees.env.STRIPE_SECRET || '');
+const stripe = new Stripe(process.env.STRIPE_SECRET || '');
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -54,44 +54,23 @@ export default async function handler(req, res) {
       });
     }
 
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(order.total * 100),
-      currency: "usd",
-      receipt_email: customer.email,
+ const paymentIntent = await stripe.paymentIntents.create({
+  amount: Math.round(order.total * 100),
+  currency: "usd",
+  receipt_email: customer.email,
 
-      payment_method_data: {
-        type: "card",
-        card: {
-          number: payment.cardNumber,
-          exp_month: Number(payment.expiryDate.split("/")[0]),
-          exp_year: Number(`20${payment.expiryDate.split("/")[1]}`),
-          cvc: payment.cvv,
-        },
+  payment_method_types: ["card"],
 
-        billing_details: {
-          name: payment.cardName,
-          email: customer.email,
-          phone: customer.phone,
-          address: {
-            line1: shipping.address,
-            city: shipping.city,
-            state: shipping.state,
-            postal_code: shipping.zipCode,
-          },
-        },
-      },
+  payment_method: "pm_card_visa",
 
-      confirm: true,
-      automatic_payment_methods: {
-        enabled: false,
-      },
+  confirm: true,
 
-      metadata: {
-        userId: id,
-        productId: order.productId,
-        productName: order.name,
-      },
-    });
+  metadata: {
+    userId: id,
+    productId: order.productId,
+    productName: order.name,
+  },
+});
 
     const newOrder = await Order.create({
       userId: id,
