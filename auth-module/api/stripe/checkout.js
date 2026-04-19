@@ -1,22 +1,16 @@
-// pages/api/stripe/checkout.js
-
 import { connectDB } from "../../lib/mongodb.js";
 import Order from "../../module/Order.js";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET || '');
+const stripe = new Stripe(process.env.STRIPE_SECRET || "");
 
 export default async function handler(req, res) {
+  // 🌍 GLOBAL CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "POST, OPTIONS"
-  );
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization"
-  );
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS, GET");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
+  // ⚡ MUST handle preflight FIRST
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
@@ -31,14 +25,7 @@ export default async function handler(req, res) {
   try {
     await connectDB();
 
-    console.log("asdf")
-    const {
-      id,
-      customer,
-      shipping,
-      payment,
-      order,
-    } = req.body;
+    const { id, customer, shipping, payment, order } = req.body;
 
     if (!id) {
       return res.status(400).json({
@@ -54,42 +41,33 @@ export default async function handler(req, res) {
       });
     }
 
- const paymentIntent = await stripe.paymentIntents.create({
-  amount: Math.round(order.total * 100),
-  currency: "usd",
-  receipt_email: customer.email,
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(order.total * 100),
+      currency: "usd",
+      receipt_email: customer.email,
 
-  payment_method_types: ["card"],
+      payment_method_types: ["card"],
+      payment_method: "pm_card_visa",
+      confirm: true,
 
-  payment_method: "pm_card_visa",
-
-  confirm: true,
-
-  metadata: {
-    userId: id,
-    productId: order.productId,
-    productName: order.name,
-  },
-});
+      metadata: {
+        userId: id,
+        productId: order.productId,
+        productName: order.name,
+      },
+    });
 
     const newOrder = await Order.create({
       userId: id,
-
       customer,
       shipping,
-
       payment: {
         method: "stripe",
         paymentIntentId: paymentIntent.id,
         status: paymentIntent.status,
       },
-
       order,
-
-      status:
-        paymentIntent.status === "succeeded"
-          ? "paid"
-          : "pending",
+      status: paymentIntent.status === "succeeded" ? "paid" : "pending",
     });
 
     return res.status(200).json({
@@ -102,10 +80,7 @@ export default async function handler(req, res) {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message:
-        error?.raw?.message ||
-        error.message ||
-        "Payment failed",
+      message: error?.raw?.message || error.message || "Payment failed",
     });
   }
 }
