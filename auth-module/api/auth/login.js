@@ -49,6 +49,8 @@ export default async function handler(req, res) {
       email: user.email,
       isGuest: false,
       role: user.role,
+      name: user.name || '',
+      phone: user.phone || '',
       token,
     });
   } catch (err) {

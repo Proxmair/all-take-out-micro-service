@@ -18,12 +18,14 @@ export default async function handler(req, res) {
   try {
     await connectDB();
 
-    let { email, password, isGuest, phone, name } = req.body;
+    let { email, password, isGuest, phone, name } = req.body || {};
 
     if (isGuest) {
       const guest = generateGuestUser();
       email = guest.email;
       password = guest.password;
+      name = guest.name,
+      phone = guest.phone
     }
 
     if (!email || !password) {
