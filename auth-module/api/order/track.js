@@ -25,23 +25,27 @@ export default async function handler(req, res) {
   try {
     await connectDB();
 
-    const { orderId } = req.body;
+    const { orderId, trackingNumber } = req.body;
 
-    if (!orderId) {
+    if (!orderId && !trackingNumber) {
       return res.status(400).json({
         success: false,
-        message: "orderId is required",
+        message: "orderId or trackingNumber is required",
       });
     }
 
-    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    if (orderId && !mongoose.Types.ObjectId.isValid(orderId)) {
       return res.status(400).json({
         success: false,
         message: "Invalid orderId",
       });
     }
 
-    const order = await Order.findById(orderId);
+    let order = await Order.findById(orderId);
+
+    if (!order) {
+      order = await Order.findOne({ trackingNumber });
+    }
 
     return res.status(200).json({
       success: true,

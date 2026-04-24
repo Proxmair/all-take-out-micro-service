@@ -10,6 +10,12 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
 
+    trackingNumber: {
+      type: String,
+      unique: true,
+      default: () => `Order-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    },
+
     customer: {
       firstName: String,
       lastName: String,
