@@ -47,6 +47,13 @@ export default async function handler(req, res) {
       order = await Order.findOne({ trackingNumber });
     }
 
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
     return res.status(200).json({
       success: true,
       count: order.length,
