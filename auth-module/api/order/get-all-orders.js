@@ -25,7 +25,7 @@ export default async function handler(req, res) {
   try {
     await connectDB();
 
-    const { adminId } = req.body;
+    const { adminId, task } = req.body;
 
     if (!adminId) {
       return res.status(400).json({
@@ -51,16 +51,48 @@ export default async function handler(req, res) {
       });
     }
 
-    // 📦 Fetch all orders
-    const orders = await Order.find({})
+    if (task === 'getAllOrders') {
+      const orders = await Order.find({})
       .sort({ createdAt: -1 })
       .lean();
 
-    return res.status(200).json({
-      success: true,
-      count: orders.length,
-      orders,
-    });
+      return res.status(200).json({
+        success: true,
+        count: orders.length,
+        orders,
+      });
+    }
+    else if (task === 'updateOrderStatus') {
+      const {orderId,newStatus} = req.body;
+
+      if (!orderId || !newStatus) {
+        return res.status(400).json({
+          success: false,
+          message: "Missing orderId or newStatus field",
+        });
+      }
+
+      const updatedOrder = await Order.findByIdAndUpdate(orderId, { status: newStatus }, { new: true });
+
+      if (!updatedOrder) {
+        return res.status(404).json({
+          success: false,
+          message: "Order not found",
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "Order status updated successfully",
+        order: updatedOrder,
+      });
+    }
+    else {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid task",
+      });
+    }
   } catch (err) {
     return res.status(500).json({
       success: false,
